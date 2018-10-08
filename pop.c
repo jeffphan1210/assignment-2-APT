@@ -40,7 +40,7 @@ Pop_node *create_Node(Pop_list *p,int numAllele){
 }
 void pop_create_gene(int popsize, Pop_list *poplist, int width){
     int i;
-    for(i = 0; i < popsize; i++){
+    for(i = 0; i <= popsize; i++){
         Pop_node *newNode = create_Node(poplist,width);
         insertNode(poplist,newNode);
     }
@@ -57,43 +57,60 @@ void insertNode(Pop_list *p,Pop_node *node){
 }
 
 void bubbleSortPop(Pop_list *p){
-    int swap;
-    Pop_node *tmp,*tmp2 = NULL;
-    if( p->head == NULL) return;
-    do{
-        swap = 0;
-        tmp = p->head;
-        
-        while(tmp->next != tmp2){
-            if(tmp->gene->fitness > tmp->next->gene->fitness )
-            {
-                swapNode(tmp,tmp->next);
-                swap = 1;
+    Boolean swap = FALSE;
+    Pop_node *curr,*tmp2 = NULL;
+    curr = tmp2 = p->head;
+
+    if( curr == NULL || curr->next == NULL) return;
+    while(!swap){
+        swap = TRUE;
+        while(curr->next!= NULL){
+            if(gene_get_fitness(curr->gene) < gene_get_fitness(curr->next->gene)){
+                swap = FALSE;
+                swapGene(curr,curr->next);
             }
+            curr = curr->next;
         }
-        tmp2 = tmp;
+        curr = p->head;
     }
-    while(swap);
 }
 
-void swapNode(Pop_node *a, Pop_node *b){
-    Gene *tmp = a->gene;
+void swapGene(Pop_node *a, Pop_node *b){
+    Gene *tmpGene = a->gene;
     a->gene = b->gene;
-    b->gene = tmp;
+    b->gene = tmpGene;
 }
 
 
 
 void printPopList(Pop_list *poplist){
-    Pop_node *curr;
-    if( poplist->head == NULL){
+    Pop_node *curr = poplist->head;
+    if( curr == NULL){
         printf("null list");
         return;
     }
-    curr = poplist->head;
     while(curr->next!= NULL){
         gene_print(curr->gene);
         curr = curr->next;
+    }
+}
+
+Pop_list *reproducePop(Pop_list *poplist){
+    float randNum = (rand()/(float)RAND_MAX + 1);
+
+}
+void calculateFitness(Pop_list *poplist,InVTable *invt){
+    Pop_node *node = poplist->head;
+    double totalFitness = 0;
+    while(node!=NULL){
+        gene_calc_fitness(node->gene,poplist->evaluate_fn,invt);
+        totalFitness += node->gene->fitness;
+        node = node->next;
+    }
+    node = poplist->head;
+    while(node!=NULL){
+        gene_normalise_fitness(node->gene,totalFitness);
+        node = node->next;
     }
 }
 

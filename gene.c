@@ -172,15 +172,12 @@ double distance(InVector a, InVector b){
 }
 
 double eval_minfn(InVTable *invt, Gene *gene){
-    int i,j,tmpsum;
+    int j,tmpsum=0;
     double sum=0;
-    for(i = 0; i < invt->tot;i++){
-        tmpsum = 0;
-        for(j=0;j<invt->width-1;j++){
-            tmpsum = tmpsum + (invt->table[i][j]*gene->chromosome[j]);
-        }
-        sum += abs(tmpsum - invt->table[i][INVT_WIDTH-1]);
+    for(j=0;j<invt->width-1;j++){
+        tmpsum += invt->table[0][j]*gene->chromosome[j];
     }
+    sum += abs(tmpsum - invt->table[0][INVT_WIDTH-1]);
     return sum;
 }
 
@@ -193,12 +190,15 @@ Gene * gene_create_rand_gene(int numAlleles, CreateFn create_chrom){
 }
 
 void gene_calc_fitness(Gene *gene, EvalFn evaluate_fn, InVTable *invTab){
+
     gene->raw_score = evaluate_fn(invTab,gene);
     gene->fitness = 1/(gene->raw_score + 1.0);
 }
 
 
 void gene_normalise_fitness(Gene *gene, double total_fitness){
+
+        printf("yes i'm he3333re\n");
     gene->fitness = gene_get_fitness(gene)/total_fitness;
 }
 

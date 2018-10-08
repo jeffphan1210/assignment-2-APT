@@ -80,8 +80,10 @@ int main(int argc, char *argv[]){
     return EXIT_SUCCESS;
 }
 void pop_setup(char *type,Pop_list *poplist){
-    if(strcmp(type,CMD_ARG_MINFN)==0)
+    if(strcmp(type,CMD_ARG_MINFN)==0){
         pop_set_fns(poplist,create_minfn_chrom,mutate_minfn,crossover_minfn,eval_minfn);
+    }
+       
     else if (strcmp(type,CMD_ARG_PCBMILL)==0)
         pop_set_fns(poplist,create_pcbmill_chrom,mutate_pcbmill,crossover_pcbmill,eval_pcbmill);
 }
@@ -102,23 +104,19 @@ int checkType(char *type,int i,int size,int counter){
 
 int mainFunction(int argc, char *argv[]){
     Pop_list *poplist;
-    Pop_node *curr;
+    /*Pop_node *curr;*/
     char input[MAXINPUT];
-    int i;
-    int counter=0;
+    int i=0,inputI, counter=0;
     int size = checkStrtol(argv[alleleSize]);
     int populationSize = checkStrtol(argv[popSize]);
-    FILE *file;
-    int inputI;
+    int numberGen = checkStrtol(argv[numGen]);
+    FILE *file = fopen(argv[inputFile],"r");
     InVTable *invt = safeMalloc(sizeof(InVTable));
-    
-    
     invector_init(invt);
     if(!(argc == CMD_ARG_MAX || argc == CMD_ARG_MAX - 1)){
         printf("main: incorrect number of arguments\n");
         return EXIT_FAILURE;
     }
-    file = fopen(argv[inputFile],"r");
     if(file == NULL) {
         printf("main: incorrect number of arguments\n");
         return EXIT_FAILURE;
@@ -129,7 +127,6 @@ int mainFunction(int argc, char *argv[]){
             return EXIT_FAILURE;
         }
     }
-    i=0;
     while (fgets(input,INVT_MAX,file)!= NULL){
         int tmpCounter = counter;
         checkOverflow(input);
@@ -140,19 +137,26 @@ int mainFunction(int argc, char *argv[]){
             printf("allelesize mismatch with vector size\n");
             return EXIT_FAILURE;
         }
+        invt->tot +=1;
+
         i++;
     }
     if(!checkType(argv[geneType],inputI,size,counter)){
         printf("allelesize mismatch with vector size\n");
         return EXIT_FAILURE;
     };
+    invt->width = counter;
     fclose(file);
     pop_init(&poplist);
     pop_setup(argv[geneType],poplist);
     pop_create_gene(populationSize,poplist,size);
     printPopList(poplist);
+    calculateFitness(poplist,invt);
+    bubbleSortPop(poplist);
+    printPopList(poplist);
     return EXIT_SUCCESS;
 }
+
 
 /*
 Boolean validStringTok(char *str){
