@@ -197,8 +197,6 @@ void gene_calc_fitness(Gene *gene, EvalFn evaluate_fn, InVTable *invTab){
 
 
 void gene_normalise_fitness(Gene *gene, double total_fitness){
-
-        printf("yes i'm he3333re\n");
     gene->fitness = gene_get_fitness(gene)/total_fitness;
 }
 
