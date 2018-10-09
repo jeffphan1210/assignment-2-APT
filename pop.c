@@ -116,10 +116,10 @@ void calculateFitness(Pop_list *poplist,InVTable *invt){
 
 Pop_node *rouletteSelection(Pop_list *poplist)
 {
-    //generate a random number between 0 & total fitness count
+    /*/generate a random number between 0 & total fitness count*/
     double fitnessRandom = (double)(RAND_MAX * 1);
      
-    //go through the chromosones adding up the fitness so far
+    /*go through the chromosones adding up the fitness so far*/
     double fitnessSoFar = 0.0;
     Pop_node * curr = poplist->head;
     if (curr == NULL) return NULL;

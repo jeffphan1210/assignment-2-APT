@@ -45,11 +45,12 @@ void pop_set_fns(Pop_list *p,CreateFn cf,MutateFn mf,CrossOverFn cof,EvalFn ef);
  * of the function. */
 void pop_print_fittest(Pop_list *p);
 
-void swapNode(Pop_node *a, Pop_node *b);
 void pop_create_gene(int popsize, Pop_list *poplist, int width);
 void insertNode(Pop_list *p,Pop_node *node);
 void printPopList(Pop_list *poplist);
-
+void swapGene(Pop_node *a, Pop_node *b);
+void calculateFitness(Pop_list *poplist,InVTable *invt);
 Pop_node *create_Node(Pop_list *p,int numAllele);
+Pop_node *rouletteSelection(Pop_list *poplist);
 /* TO DO - other functions as appropriate */
 #endif

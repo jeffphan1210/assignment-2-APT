@@ -1,6 +1,6 @@
 CC = gcc
-DEBUG = -DDEBUG -g -lm
-CFLAGS = -ansi -pedantic -Wall -lm
+DEBUG = -DDEBUG -g
+CFLAGS = -ansi -pedantic -Wall
 PROG = test
 OBJS = drive.o gene.o invector.o pop.o utility.o
 
