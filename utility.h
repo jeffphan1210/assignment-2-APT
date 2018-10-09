@@ -13,8 +13,11 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#define MAX 100
 
-
+#define MIN_RAND 0.0
+#define MAX_RAND 1.0
+#define RANGE (MAX_RAND - MIN_RAND)
 typedef enum boolean
 {
     FALSE = 0,
@@ -26,6 +29,7 @@ void printInvalidInput();
 void checkInvalidString(char *a);
 int checkStrtol(char *input);
 void checkOverflow(char *str);
+int randomNumber100();
 #endif
 
 

@@ -135,10 +135,9 @@ Gene * crossover_minfn(Gene *g1, Gene *g2){
 	int index,i;
 	Gene *newGene = safeMalloc(sizeof(Gene));
 	newGene->num_alleles = g1->num_alleles;
-	newGene->chromosome = safeMalloc(sizeof(int* )*newGene->num_alleles);
+	newGene->chromosome = safeMalloc(sizeof(int)*newGene->num_alleles);
 	newGene->fitness = 0;
 	newGene->raw_score = 0;
-
 	#ifdef DEBUG
 		index = 2;
 	#else
@@ -149,9 +148,11 @@ Gene * crossover_minfn(Gene *g1, Gene *g2){
 	for(;i<index+1;i++){
 		newGene->chromosome[i] = g1->chromosome[i];
 	}
+
 	for(;i<newGene->num_alleles;i++){
 		newGene->chromosome[i] = g2->chromosome[i];
 	}
+	
 	return newGene;
 }
 double eval_pcbmill(InVTable *invt, Gene *gene){
@@ -221,5 +222,15 @@ void gene_print(Gene *gene) {
         }
     }
     printf(" fit: %.3f raw: %.3f\n",gene->fitness,gene->raw_score);
+}
+
+Gene *cloneGene(Gene *gene){
+	Gene *clone = safeMalloc(sizeof(Gene));
+	clone->chromosome = safeMalloc(sizeof(gene->chromosome));
+	memcpy(clone->chromosome,gene->chromosome,sizeof(int*)*gene->num_alleles);
+	clone->fitness = 0;
+	clone->num_alleles = gene->num_alleles;
+	clone->raw_score = 0;
+	return clone;
 }
 

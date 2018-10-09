@@ -103,7 +103,6 @@ int validArgu(int argc, char *argv[],FILE *file,InVTable *invt ){
         checkOverflow(input);
         input[strlen(input) - 1] = '\0';
         inputI = convertInput(input,invt->table[i],&counter,size);
-        printf("%d counter here", counter);
         if( i != inputI /*TODO*/){
             printf("I'm here i = %d, inputI = %d, tmpCounter = %d, counter = %d",i,inputI,tmpCounter,counter);
             printf("allelesize mismatch with vector size\n");
@@ -121,9 +120,10 @@ int validArgu(int argc, char *argv[],FILE *file,InVTable *invt ){
 }
 
 int mainFunction(int argc, char *argv[]){
-    Pop_list *poplist;
+    Pop_list *poplist,*tmpPopList;
     /*Pop_node *curr;*/
     InVTable *invt;
+    int count = 0;
     int size = checkStrtol(argv[alleleSize]);
     int populationSize = checkStrtol(argv[popSize]);
     int numberGen = checkStrtol(argv[numGen]);
@@ -132,13 +132,29 @@ int mainFunction(int argc, char *argv[]){
     invector_init(invt);
     if(validArgu(argc,argv,file,invt)) return EXIT_FAILURE;
     fclose(file);
-    pop_init(&poplist);
-    pop_setup(argv[geneType],poplist);
-    pop_create_gene(populationSize,poplist,size);
-    printPopList(poplist);
-    calculateFitness(poplist,invt);
-    bubbleSortPop(poplist);
-    printPopList(poplist);
+    while(count<numberGen){
+        if(count == 0){
+            pop_init(&poplist);
+            pop_setup(argv[geneType],poplist);
+            pop_create_gene(populationSize,poplist,size);
+            tmpPopList = poplist;
+        }
+        else {
+            tmpPopList = reproducePop(poplist);
+            
+        }
+    
+        printf("\n");
+        printPopList(tmpPopList);
+        for(int i = 0;i<4;i++){
+            printf("invt %d ",invt->table[0][i]);
+        }
+        calculateFitness(tmpPopList,invt);
+        bubbleSortPop(tmpPopList);
+        printPopList(tmpPopList);
+        poplist = tmpPopList;
+        count++;
+    }
     return EXIT_SUCCESS;
 }
 

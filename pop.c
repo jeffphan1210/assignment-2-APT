@@ -5,6 +5,7 @@
  ******************************************************************************/
 
 #include "pop.h"
+#include <unistd.h>
 
 Boolean pop_init(Pop_list **pop){
     *pop = safeMalloc(sizeof(Pop_list));
@@ -52,8 +53,12 @@ void insertNode(Pop_list *p,Pop_node *node){
         p->count++;
         return;
     }
+
     node->next = p->head;
+
     p->head = node;
+    p->count++;
+
 }
 
 void bubbleSortPop(Pop_list *p){
@@ -96,16 +101,50 @@ void printPopList(Pop_list *poplist){
 }
 
 Pop_list *reproducePop(Pop_list *poplist){
-    float randNum = (rand()/(float)RAND_MAX + 1);
+    int counter = 1;
+    Pop_node *newnode;
+    Pop_list *newPoplist;
+    pop_init(&newPoplist);
+    newPoplist->count = poplist->count;
+    if(poplist->head == NULL) return NULL;
+    newnode = cloneNode(poplist->head);
+    insertNode(newPoplist,newnode);
+    while(counter<poplist->count-1){
+        Gene *par1;
+        par1 = rouletteSelection(poplist);
+        if(randomNumber100()<=5) pop_list_add(newPoplist,poplist->mutate_gene(par1));
+        else{
+            Gene *par2 = rouletteSelection(poplist);
+            pop_list_add(newPoplist,poplist->crossover_genes(par1,par2));
+        }
+        counter++;
 
+    }
+    return newPoplist;
+}
+
+void pop_list_add(Pop_list *poplist,Gene *gene){
+
+    Pop_node *newchild = safeMalloc(sizeof(Pop_node));
+    newchild->gene = gene;
+    newchild->next = NULL;
+    insertNode(poplist,newchild);
+}
+
+void copyPoplist(Pop_list *dest,Pop_list *poplist){
+    pop_set_fns(dest,poplist->create_rand_chrom,poplist->mutate_gene,poplist->crossover_genes,poplist->evaluate_fn);
+}
+
+Pop_node *cloneNode(Pop_node *node){
+    
+    Pop_node *new = safeMalloc(sizeof(Pop_node));
+    new->gene = cloneGene(node->gene);
+    new->next = NULL;
+    return new;
 }
 void calculateFitness(Pop_list *poplist,InVTable *invt){
     Pop_node *node = poplist->head;
     double totalFitness = 0;
-    int i =0;
-    for(;i<invt->width;i++){
-        printf("%d \n",invt->table[0][i]);
-    }
     while(node!=NULL){
         gene_calc_fitness(node->gene,poplist->evaluate_fn,invt);
         totalFitness += node->gene->fitness;
@@ -118,20 +157,39 @@ void calculateFitness(Pop_list *poplist,InVTable *invt){
     }
 }
 
-Pop_node *rouletteSelection(Pop_list *poplist)
+Gene *rouletteSelection(Pop_list *poplist)
 {
-    /*/generate a random number between 0 & total fitness count*/
-    double fitnessRandom = (double)(RAND_MAX * 1);
-     
-    /*go through the chromosones adding up the fitness so far*/
-    double fitnessSoFar = 0.0;
     Pop_node * curr = poplist->head;
+    double fitnessSoFar = 0.0;
+    /*/generate a random number between 0 & total fitness count*/
+    double fitnessRandom = RANGE * ((((double) rand()) / (double) RAND_MAX)) + MIN_RAND ;
+
+    /*go through the chromosones adding up the fitness so far*/
     if (curr == NULL) return NULL;
     while(curr!= NULL){
         fitnessSoFar += gene_get_fitness(curr->gene);
-        if(fitnessSoFar >= fitnessRandom) return curr;
+        if(fitnessSoFar >= fitnessRandom) {
+            return curr->gene;
+        }
+        curr = curr->next;
     }
     return NULL;
 }
+
+void popListFree(Pop_node *head){
+    Pop_node *tmp ;
+    while(head!=NULL){
+        tmp = head;
+        head = head->next;
+        gene_free(tmp->gene);
+        free(tmp);
+    }
+}
+
+void freeNode(Pop_node *node){
+    gene_free(node->gene);
+    free(node);
+}
+
 
 /* TO DO - other functions as appropriate */

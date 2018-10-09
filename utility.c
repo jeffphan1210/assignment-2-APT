@@ -40,3 +40,7 @@ void checkOverflow(char *str){
         exit(EXIT_FAILURE);
     }
 }
+
+int randomNumber100(){
+    return (rand() % MAX + 1);
+}
