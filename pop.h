@@ -52,5 +52,6 @@ void swapGene(Pop_node *a, Pop_node *b);
 void calculateFitness(Pop_list *poplist,InVTable *invt);
 Pop_node *create_Node(Pop_list *p,int numAllele);
 Pop_node *rouletteSelection(Pop_list *poplist);
+void bubbleSortPop(Pop_list *p);
 /* TO DO - other functions as appropriate */
 #endif

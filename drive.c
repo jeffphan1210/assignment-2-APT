@@ -79,40 +79,11 @@ int main(int argc, char *argv[]){
     
     return EXIT_SUCCESS;
 }
-void pop_setup(char *type,Pop_list *poplist){
-    if(strcmp(type,CMD_ARG_MINFN)==0){
-        pop_set_fns(poplist,create_minfn_chrom,mutate_minfn,crossover_minfn,eval_minfn);
-    }
-       
-    else if (strcmp(type,CMD_ARG_PCBMILL)==0)
-        pop_set_fns(poplist,create_pcbmill_chrom,mutate_pcbmill,crossover_pcbmill,eval_pcbmill);
-}
 
-int checkType(char *type,int i,int size,int counter){
-    if(strcmp(type,CMD_ARG_MINFN)==0 && size < INVT_WIDTH && size >0) {
-        printf("pass 1st argu counter: %d   i= %d    size: %d \n ", counter,i,size);
-        if (i==0 && counter == size) {
-            printf("pass 2st argu %d\n", counter);
-            return 1;
-        }
-        return 0;
-    }
-    else if(strcmp(type,CMD_ARG_PCBMILL)==0  && i>0 && size == 2) return 1;
-    else return 0;
-}
-
-
-int mainFunction(int argc, char *argv[]){
-    Pop_list *poplist;
-    /*Pop_node *curr;*/
+int validArgu(int argc, char *argv[],FILE *file,InVTable *invt ){
     char input[MAXINPUT];
     int i=0,inputI, counter=0;
     int size = checkStrtol(argv[alleleSize]);
-    int populationSize = checkStrtol(argv[popSize]);
-    int numberGen = checkStrtol(argv[numGen]);
-    FILE *file = fopen(argv[inputFile],"r");
-    InVTable *invt = safeMalloc(sizeof(InVTable));
-    invector_init(invt);
     if(!(argc == CMD_ARG_MAX || argc == CMD_ARG_MAX - 1)){
         printf("main: incorrect number of arguments\n");
         return EXIT_FAILURE;
@@ -132,20 +103,34 @@ int mainFunction(int argc, char *argv[]){
         checkOverflow(input);
         input[strlen(input) - 1] = '\0';
         inputI = convertInput(input,invt->table[i],&counter,size);
+        printf("%d counter here", counter);
         if( i != inputI /*TODO*/){
             printf("I'm here i = %d, inputI = %d, tmpCounter = %d, counter = %d",i,inputI,tmpCounter,counter);
             printf("allelesize mismatch with vector size\n");
             return EXIT_FAILURE;
         }
         invt->tot +=1;
-
         i++;
     }
+    invt->width = counter;
     if(!checkType(argv[geneType],inputI,size,counter)){
         printf("allelesize mismatch with vector size\n");
         return EXIT_FAILURE;
     };
-    invt->width = counter;
+    return EXIT_SUCCESS;
+}
+
+int mainFunction(int argc, char *argv[]){
+    Pop_list *poplist;
+    /*Pop_node *curr;*/
+    InVTable *invt;
+    int size = checkStrtol(argv[alleleSize]);
+    int populationSize = checkStrtol(argv[popSize]);
+    int numberGen = checkStrtol(argv[numGen]);
+    FILE *file = fopen(argv[inputFile],"r");
+    invt = safeMalloc(sizeof(InVTable));
+    invector_init(invt);
+    if(validArgu(argc,argv,file,invt)) return EXIT_FAILURE;
     fclose(file);
     pop_init(&poplist);
     pop_setup(argv[geneType],poplist);
@@ -157,6 +142,26 @@ int mainFunction(int argc, char *argv[]){
     return EXIT_SUCCESS;
 }
 
+
+void pop_setup(char *type,Pop_list *poplist){
+    if(strcmp(type,CMD_ARG_MINFN)==0){
+        pop_set_fns(poplist,create_minfn_chrom,mutate_minfn,crossover_minfn,eval_minfn);
+    }
+       
+    else if (strcmp(type,CMD_ARG_PCBMILL)==0)
+        pop_set_fns(poplist,create_pcbmill_chrom,mutate_pcbmill,crossover_pcbmill,eval_pcbmill);
+}
+
+int checkType(char *type,int i,int size,int counter){
+    if(strcmp(type,CMD_ARG_MINFN)==0 && size < INVT_WIDTH && size >0) {
+        if (i==0 && counter == size) {
+            return 1;
+        }
+        return 0;
+    }
+    else if(strcmp(type,CMD_ARG_PCBMILL)==0  && i>0 && size == 2) return 1;
+    else return 0;
+}
 
 /*
 Boolean validStringTok(char *str){

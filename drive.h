@@ -37,4 +37,5 @@ void test_minfn(void);
 int checkType(char *type,int i,int size,int counter);
 void pop_setup(char *type,Pop_list *poplist);
 int mainFunction(int argc, char *argv[]);
+int validArgu(int argc, char *argv[],FILE *file,InVTable *invt );
 #endif

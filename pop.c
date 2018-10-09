@@ -102,6 +102,10 @@ Pop_list *reproducePop(Pop_list *poplist){
 void calculateFitness(Pop_list *poplist,InVTable *invt){
     Pop_node *node = poplist->head;
     double totalFitness = 0;
+    int i =0;
+    for(;i<invt->width;i++){
+        printf("%d \n",invt->table[0][i]);
+    }
     while(node!=NULL){
         gene_calc_fitness(node->gene,poplist->evaluate_fn,invt);
         totalFitness += node->gene->fitness;
