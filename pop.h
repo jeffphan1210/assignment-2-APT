@@ -58,7 +58,7 @@ Pop_node *cloneNode(Pop_node *node);
 void popListFree(Pop_list *poplist);
 void freeNode(Pop_node *node);
 void pop_list_add(Pop_list *poplist,Gene *gene);
-void pop_setup(char *type,Pop_list *poplist);
 void swapPopList(Pop_list *p,Pop_list *p1);
+void freeList(Pop_node *currentNode);
 /* TO DO - other functions as appropriate */
 #endif

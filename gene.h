@@ -84,4 +84,5 @@ void gene_print(Gene*);
 Boolean checkduplicate(int *a, int b,int size);
 double distance(InVector a, InVector b);
 Gene *cloneGene(Gene *gene);
+void printInVtable(InVTable *invt);
 #endif

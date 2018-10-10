@@ -35,7 +35,7 @@ void pop_print_fittest(Pop_list *p){
 
 Pop_node *create_Node(Pop_list *p,int numAllele){
     Pop_node *newNode = safeMalloc(sizeof(Pop_node));
-    newNode->gene = gene_create_rand_gene(numAllele,create_minfn_chrom);
+    newNode->gene = gene_create_rand_gene(numAllele,p->create_rand_chrom);
     newNode->next = NULL;
     return newNode;
 }
@@ -129,7 +129,6 @@ void pop_list_add(Pop_list *poplist,Gene *gene){
     insertNode(poplist,newchild);
 }
 Pop_node *cloneNode(Pop_node *node){
-
     Pop_node *new = safeMalloc(sizeof(Pop_node));
     new->gene = cloneGene(node->gene);
     new->next = NULL;
@@ -139,6 +138,7 @@ void calculateFitness(Pop_list *poplist,InVTable *invt){
     Pop_node *node = poplist->head;
     double totalFitness = 0;
     while(node!=NULL){
+
         gene_calc_fitness(node->gene,poplist->evaluate_fn,invt);
         totalFitness += node->gene->fitness;
         node = node->next;
@@ -176,17 +176,19 @@ void swapPopList(Pop_list *p,Pop_list *p1){
 }
 
 void popListFree(Pop_list *poplist){
-    Pop_node *tmp ;
-    Pop_node *head = poplist->head;
-    while(head!=NULL){
-        tmp = head;
-        head = head->next;
-        gene_free(tmp->gene);
-        free(tmp);
-    }
+    freeList(poplist->head);
+    poplist->head = NULL;
+    poplist->create_rand_chrom = NULL;
+    poplist->crossover_genes = NULL;
+    poplist->mutate_gene = NULL;
+    poplist->evaluate_fn =NULL;
     free(poplist);
 }
 
+void freeList(Pop_node *currentNode){
+    if(currentNode->next != NULL) freeList(currentNode->next);
+    freeNode(currentNode);
+}
 void freeNode(Pop_node *node){
     gene_free(node->gene);
     free(node);

@@ -15,7 +15,7 @@ int * create_pcbmill_chrom(int numAlleles){
 	for ( i = 0; i < numAlleles; i++) {    
 		int temp = chrom[i];
 		int randomIndex = rand() % numAlleles;
-		chrom[i]           = chrom[randomIndex];
+		chrom[i] = chrom[randomIndex];
 		chrom[randomIndex] = temp;
 	}
 	return chrom;
@@ -97,7 +97,6 @@ Gene * crossover_pcbmill(Gene *g1, Gene *g2){
     while (TRUE){
         index2 = rand() % gene->num_alleles;
         if(index1 <= index2) {
-            printf("i1 : %d, i2: %d\n",index1,index2);
             break;
         }
     }
@@ -158,11 +157,10 @@ Gene * crossover_minfn(Gene *g1, Gene *g2){
 double eval_pcbmill(InVTable *invt, Gene *gene){
     int i,j;
     double sum=0;
-    for(i = 0; i < gene->num_alleles-1;i++){
+    for(i = 0; i < invt->tot-1;i++){
         j = i;
         j++;
         sum += distance(invt->table[i],invt->table[j]);
-        i--;
     }
     return sum;
 }
@@ -176,7 +174,6 @@ double eval_minfn(InVTable *invt, Gene *gene){
     int j,tmpsum=0;
     double sum=0;
     for(j=0;j<invt->width;j++){
-		int tmp = invt->table[0][j]*gene->chromosome[j];
         tmpsum += invt->table[0][j]*gene->chromosome[j];
     }
     sum = abs(tmpsum - invt->table[0][INVT_WIDTH-1]);
@@ -194,6 +191,7 @@ Gene * gene_create_rand_gene(int numAlleles, CreateFn create_chrom){
 void gene_calc_fitness(Gene *gene, EvalFn evaluate_fn, InVTable *invTab){
 
     gene->raw_score = evaluate_fn(invTab,gene);
+
     gene->fitness = 1/(gene->raw_score + 1.0);
 }
 
@@ -205,6 +203,16 @@ void gene_normalise_fitness(Gene *gene, double total_fitness){
 void gene_free(Gene *gene){
 	free(gene->chromosome);
 	free(gene);
+}
+
+void printInVtable(InVTable *invt){
+	int m,n;
+	for( m =0;m<=11;m++){
+        for( n =0;n<=1;n++){
+            printf("%d ",invt->table[m][n]);
+        }
+        printf("\n");
+    }
 }
 
 
@@ -227,8 +235,10 @@ void gene_print(Gene *gene) {
 
 Gene *cloneGene(Gene *gene){
 	Gene *clone = safeMalloc(sizeof(Gene));
-	clone->chromosome = safeMalloc(sizeof(gene->chromosome));
-	memcpy(clone->chromosome,gene->chromosome,sizeof(int*)*gene->num_alleles);
+
+	clone->num_alleles = gene->num_alleles;
+	clone->chromosome = safeMalloc(sizeof(int*)*clone->num_alleles);
+	memcpy(clone->chromosome,gene->chromosome,sizeof(int*)*clone->num_alleles);
 	clone->fitness = 0;
 	clone->num_alleles = gene->num_alleles;
 	clone->raw_score = 0;

@@ -44,3 +44,7 @@ void checkOverflow(char *str){
 int randomNumber100(){
     return (rand() % MAX + 1);
 }
+void printMismatchsize(){
+    perror("allelesize mismatch with vector size\n");
+}
+

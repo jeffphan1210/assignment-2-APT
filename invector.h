@@ -47,7 +47,7 @@ typedef struct invector_table
 
 /* Initialise the InVTable to a safe state */
 void invector_init(InVTable *invt);
-int convertInput(char *input,InVector a,int *counter,int);
+int convertInput(char *input,InVector a,int *counter,int,char *);
 /* TO DO - other functions as appropriate */
 
 #endif

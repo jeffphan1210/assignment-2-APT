@@ -30,6 +30,7 @@ void checkInvalidString(char *a);
 int checkStrtol(char *input);
 void checkOverflow(char *str);
 int randomNumber100();
+void printMismatchsize();
 #endif
 
 
