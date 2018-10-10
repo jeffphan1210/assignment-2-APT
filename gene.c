@@ -175,10 +175,11 @@ double distance(InVector a, InVector b){
 double eval_minfn(InVTable *invt, Gene *gene){
     int j,tmpsum=0;
     double sum=0;
-    for(j=0;j<invt->width-1;j++){
+    for(j=0;j<invt->width;j++){
+		int tmp = invt->table[0][j]*gene->chromosome[j];
         tmpsum += invt->table[0][j]*gene->chromosome[j];
     }
-    sum += abs(tmpsum - invt->table[0][INVT_WIDTH-1]);
+    sum = abs(tmpsum - invt->table[0][INVT_WIDTH-1]);
     return sum;
 }
 

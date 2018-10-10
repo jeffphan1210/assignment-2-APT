@@ -100,43 +100,36 @@ void printPopList(Pop_list *poplist){
     }
 }
 
-Pop_list *reproducePop(Pop_list *poplist){
+void reproducePop(Pop_list *gen0,Pop_list *gen1){
     int counter = 1;
     Pop_node *newnode;
-    Pop_list *newPoplist;
-    pop_init(&newPoplist);
-    newPoplist->count = poplist->count;
-    if(poplist->head == NULL) return NULL;
-    newnode = cloneNode(poplist->head);
-    insertNode(newPoplist,newnode);
-    while(counter<poplist->count-1){
+    gen1->count = gen0->count;
+
+    if(gen0->head == NULL) return;
+    newnode = cloneNode(gen0->head);
+    insertNode(gen1,newnode); 
+    while(counter<gen0->count-1){
         Gene *par1;
-        par1 = rouletteSelection(poplist);
-        if(randomNumber100()<=5) pop_list_add(newPoplist,poplist->mutate_gene(par1));
+        par1 = rouletteSelection(gen0);
+        if(randomNumber100()<=5) pop_list_add(gen1,gen1->mutate_gene(par1));
         else{
-            Gene *par2 = rouletteSelection(poplist);
-            pop_list_add(newPoplist,poplist->crossover_genes(par1,par2));
+            Gene *par2 = rouletteSelection(gen0);
+
+            pop_list_add(gen1,gen1->crossover_genes(par1,par2));
         }
         counter++;
 
     }
-    return newPoplist;
 }
 
 void pop_list_add(Pop_list *poplist,Gene *gene){
-
     Pop_node *newchild = safeMalloc(sizeof(Pop_node));
     newchild->gene = gene;
     newchild->next = NULL;
     insertNode(poplist,newchild);
 }
-
-void copyPoplist(Pop_list *dest,Pop_list *poplist){
-    pop_set_fns(dest,poplist->create_rand_chrom,poplist->mutate_gene,poplist->crossover_genes,poplist->evaluate_fn);
-}
-
 Pop_node *cloneNode(Pop_node *node){
-    
+
     Pop_node *new = safeMalloc(sizeof(Pop_node));
     new->gene = cloneGene(node->gene);
     new->next = NULL;
@@ -169,21 +162,29 @@ Gene *rouletteSelection(Pop_list *poplist)
     while(curr!= NULL){
         fitnessSoFar += gene_get_fitness(curr->gene);
         if(fitnessSoFar >= fitnessRandom) {
-            return curr->gene;
+            Gene *clone = cloneGene(curr->gene);
+            return clone;
         }
         curr = curr->next;
     }
     return NULL;
 }
+void swapPopList(Pop_list *p,Pop_list *p1){
+    Pop_node *tmphead = p->head;
+    p->head = p1->head;
+    p1->head = tmphead;
+}
 
-void popListFree(Pop_node *head){
+void popListFree(Pop_list *poplist){
     Pop_node *tmp ;
+    Pop_node *head = poplist->head;
     while(head!=NULL){
         tmp = head;
         head = head->next;
         gene_free(tmp->gene);
         free(tmp);
     }
+    free(poplist);
 }
 
 void freeNode(Pop_node *node){

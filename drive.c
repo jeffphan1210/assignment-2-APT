@@ -84,6 +84,7 @@ int validArgu(int argc, char *argv[],FILE *file,InVTable *invt ){
     char input[MAXINPUT];
     int i=0,inputI, counter=0;
     int size = checkStrtol(argv[alleleSize]);
+
     if(!(argc == CMD_ARG_MAX || argc == CMD_ARG_MAX - 1)){
         printf("main: incorrect number of arguments\n");
         return EXIT_FAILURE;
@@ -92,7 +93,13 @@ int validArgu(int argc, char *argv[],FILE *file,InVTable *invt ){
         printf("main: incorrect number of arguments\n");
         return EXIT_FAILURE;
     }
-    if((strcmp(argv[geneType],CMD_ARG_PCBMILL)==0)){
+    if(strcmp(argv[geneType],CMD_ARG_MINFN)!=0 && strcmp(argv[geneType],CMD_ARG_PCBMILL)!=0){
+        printf("incorrect 2nd argument\n");
+        return EXIT_FAILURE;
+    }
+        
+
+    if(strcmp(argv[geneType],CMD_ARG_PCBMILL)==0 ){
         if(size != 2) {
             printf("incorrect 2nd argument\n");
             return EXIT_FAILURE;
@@ -120,7 +127,7 @@ int validArgu(int argc, char *argv[],FILE *file,InVTable *invt ){
 }
 
 int mainFunction(int argc, char *argv[]){
-    Pop_list *poplist,*tmpPopList;
+    Pop_list *poplist;
     /*Pop_node *curr;*/
     InVTable *invt;
     int count = 0;
@@ -130,29 +137,28 @@ int mainFunction(int argc, char *argv[]){
     FILE *file = fopen(argv[inputFile],"r");
     invt = safeMalloc(sizeof(InVTable));
     invector_init(invt);
+
     if(validArgu(argc,argv,file,invt)) return EXIT_FAILURE;
     fclose(file);
     while(count<numberGen){
+        printf("count gen %d\n",count);
         if(count == 0){
             pop_init(&poplist);
             pop_setup(argv[geneType],poplist);
             pop_create_gene(populationSize,poplist,size);
-            tmpPopList = poplist;
         }
         else {
-            tmpPopList = reproducePop(poplist);
-            
+            Pop_list *tmpPopList;
+            pop_init(&tmpPopList);
+            pop_setup(argv[geneType],tmpPopList);
+            reproducePop(poplist,tmpPopList);
+            swapPopList(poplist,tmpPopList);
+            popListFree(tmpPopList);
+
         }
-    
-        printf("\n");
-        printPopList(tmpPopList);
-        for(int i = 0;i<4;i++){
-            printf("invt %d ",invt->table[0][i]);
-        }
-        calculateFitness(tmpPopList,invt);
-        bubbleSortPop(tmpPopList);
-        printPopList(tmpPopList);
-        poplist = tmpPopList;
+        calculateFitness(poplist,invt);
+        bubbleSortPop(poplist);
+        printPopList(poplist);
         count++;
     }
     return EXIT_SUCCESS;
@@ -175,8 +181,9 @@ int checkType(char *type,int i,int size,int counter){
         }
         return 0;
     }
+    
     else if(strcmp(type,CMD_ARG_PCBMILL)==0  && i>0 && size == 2) return 1;
-    else return 0;
+    return 0;
 }
 
 /*

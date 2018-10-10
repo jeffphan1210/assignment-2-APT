@@ -53,10 +53,12 @@ void calculateFitness(Pop_list *poplist,InVTable *invt);
 Pop_node *create_Node(Pop_list *p,int numAllele);
 Gene *rouletteSelection(Pop_list *poplist);
 void bubbleSortPop(Pop_list *p);
-Pop_list *reproducePop(Pop_list *poplist);
+void reproducePop(Pop_list *gen0,Pop_list *gen1);
 Pop_node *cloneNode(Pop_node *node);
-void popListFree(Pop_node *head);
+void popListFree(Pop_list *poplist);
 void freeNode(Pop_node *node);
 void pop_list_add(Pop_list *poplist,Gene *gene);
+void pop_setup(char *type,Pop_list *poplist);
+void swapPopList(Pop_list *p,Pop_list *p1);
 /* TO DO - other functions as appropriate */
 #endif
