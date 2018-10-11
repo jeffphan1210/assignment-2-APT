@@ -72,7 +72,7 @@ int main(int argc, char *argv[]){
     test_pcbmill();
 #else
     srand(SRAND_SEED);
-    mainFunction(argc,argv);
+    return mainFunction(argc,argv);
 #endif
     
     return EXIT_SUCCESS;
@@ -83,13 +83,17 @@ int validArgu(int argc, char *argv[],FILE *file,InVTable *invt ){
     int i=0,inputI, counter=0;
     char *type = argv[geneType];
     int inputnumAllele = checkStrtol(argv[alleleSize]);
-    
+    int popsize = checkStrtol(argv[popSize]);
     if(!(argc == CMD_ARG_MAX || argc == CMD_ARG_MAX - 1)){
         printf("main: incorrect number of arguments\n");
         return EXIT_FAILURE;
     }
     if(file == NULL) {
         printf("main: incorrect number of arguments\n");
+        return EXIT_FAILURE;
+    }
+    if(popsize<2){
+        perror("invalid integer argument\n");
         return EXIT_FAILURE;
     }
     if(strcmp(type,CMD_ARG_MINFN)!=0 && strcmp(type,CMD_ARG_PCBMILL)!=0){
@@ -102,29 +106,34 @@ int validArgu(int argc, char *argv[],FILE *file,InVTable *invt ){
             return EXIT_FAILURE;
         }
     }
+    else if(strcmp(type,CMD_ARG_MINFN)==0 ){
+        if(inputnumAllele <=0 || inputnumAllele>=INVT_WIDTH) {
+            printf("incorrect 2nd argument\n");
+            return EXIT_FAILURE;
+        }
+    }
     while (fgets(input,INVT_MAX,file)!= NULL){
-        int tmpCounter = counter;
         checkOverflow(input);
         input[strlen(input) - 1] = '\0';
         inputI = convertInput(input,invt->table[i],&counter,inputnumAllele,type);
-        printf("i'm here\n");
-        validAfterInput(type,i,inputI,inputnumAllele);
+        validAfterInput(type,i,inputI,counter,inputnumAllele);
         invt->tot +=1;
         i++;
     }
     invt->width = counter;
-    
-    if(!checkType(type,inputI,inputnumAllele,counter)){
+    if( strcmp(type,CMD_ARG_PCBMILL)==0 && inputI != inputnumAllele-1){
         printMismatchsize();
         return EXIT_FAILURE;
     };
     return EXIT_SUCCESS;
 }
 
-void validAfterInput(char *type,int i, int inputI,int inputnumAllele){
-    if(strcmp(type,CMD_ARG_MINFN)==0  && inputI != 0) {
+void validAfterInput(char *type,int i, int inputI,int counter,int inputnumAllele){
+    if(strcmp(type,CMD_ARG_MINFN)==0){
+        if(inputI != 0 || counter != inputnumAllele) {
             printMismatchsize();
             exit(EXIT_FAILURE) ;
+        }
     }
     if( strcmp(type,CMD_ARG_PCBMILL)==0){
         if(inputI>inputnumAllele-1 || i != inputI){
@@ -134,7 +143,6 @@ void validAfterInput(char *type,int i, int inputI,int inputnumAllele){
         
     }
 }
-
 
 int mainFunction(int argc, char *argv[]){
     InVTable *invt;
@@ -147,7 +155,17 @@ int mainFunction(int argc, char *argv[]){
     if(validArgu(argc,argv,file,invt)) return EXIT_FAILURE;
     fclose(file); 
     size = getSize(invt,checkStrtol(argv[alleleSize]),argv[geneType]);
+    if(argc == CMD_ARG_MAX){
+        file = freopen(argv[outputFile],"w",stdout);
+        if( file== NULL){
+            perror("Unable to save file");
+            return EXIT_FAILURE;
+        }
+    }
     gaprimer(numberGen,argv[geneType],populationSize,size,invt);
+    if(argc == CMD_ARG_MAX){
+        fclose(file);
+    }
     return EXIT_SUCCESS;
 }
 
@@ -180,9 +198,10 @@ void gaprimer(int numberGen,char *type,int populationSize,int numAlle,InVTable *
         }
         calculateFitness(poplist,invt);
         bubbleSortPop(poplist);
-        printPopList(poplist);
+        pop_print_fittest(poplist,count);
         count++;
     }
+    popListFree(poplist);
 }
 
 void pop_setup(char *type,Pop_list *poplist){
@@ -192,17 +211,5 @@ void pop_setup(char *type,Pop_list *poplist){
        
     else if (strcmp(type,CMD_ARG_PCBMILL)==0)
         pop_set_fns(poplist,create_pcbmill_chrom,mutate_pcbmill,crossover_pcbmill,eval_pcbmill);
-}
-
-int checkType(char *type,int i,int size,int counter){
-    if(strcmp(type,CMD_ARG_MINFN)==0 && size < INVT_WIDTH && size >0) {
-        if (i==0 && counter == size) {
-            return 1;
-        }
-        return 0;
-    }
-    
-    else if(strcmp(type,CMD_ARG_PCBMILL)==0  && i>0 && size == 2 && counter == size) return 1;
-    return 0;
 }
 

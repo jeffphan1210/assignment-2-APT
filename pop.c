@@ -21,16 +21,21 @@ void pop_set_fns(Pop_list *p,CreateFn cf,MutateFn mf,CrossOverFn cof,EvalFn ef){
     p->evaluate_fn = ef;
 }
 
-void pop_print_fittest(Pop_list *p){
+void pop_print_fittest(Pop_list *p,int count){
     Pop_node *cur = p->head;
-    double min;
+    Pop_node *tmp;
+    double max;
     if(cur == NULL) return;
-    min = cur->gene->fitness;
+    max = cur->gene->fitness;
     while(cur!=NULL){
-        if(cur->gene->fitness <= min) min = cur->gene->fitness;
+        if(cur->gene->fitness >= max) {
+            max = cur->gene->fitness;
+            tmp = cur;
+        }
         cur = cur->next;
     }
-    printf("Fittest is : %f", min);
+    printf("Gen %d: ", count);
+    gene_print(tmp->gene);
 }
 
 Pop_node *create_Node(Pop_list *p,int numAllele){
@@ -86,8 +91,6 @@ void swapGene(Pop_node *a, Pop_node *b){
     b->gene = tmpGene;
 }
 
-
-
 void printPopList(Pop_list *poplist){
     Pop_node *curr = poplist->head;
     if( curr == NULL){
@@ -108,7 +111,7 @@ void reproducePop(Pop_list *gen0,Pop_list *gen1){
     if(gen0->head == NULL) return;
     newnode = cloneNode(gen0->head);
     insertNode(gen1,newnode); 
-    while(counter<gen0->count-1){
+    while(counter<gen0->count){
         Gene *par1;
         par1 = rouletteSelection(gen0);
         if(randomNumber100()<=5) pop_list_add(gen1,gen1->mutate_gene(par1));
@@ -138,7 +141,6 @@ void calculateFitness(Pop_list *poplist,InVTable *invt){
     Pop_node *node = poplist->head;
     double totalFitness = 0;
     while(node!=NULL){
-
         gene_calc_fitness(node->gene,poplist->evaluate_fn,invt);
         totalFitness += node->gene->fitness;
         node = node->next;
@@ -150,8 +152,7 @@ void calculateFitness(Pop_list *poplist,InVTable *invt){
     }
 }
 
-Gene *rouletteSelection(Pop_list *poplist)
-{
+Gene *rouletteSelection(Pop_list *poplist){
     Pop_node * curr = poplist->head;
     double fitnessSoFar = 0.0;
     /*/generate a random number between 0 & total fitness count*/

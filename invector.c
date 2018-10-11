@@ -22,17 +22,15 @@ int convertInput(char *input,InVector a,int *counter,int numAlle,char  *type){
     current = strtok(NULL,INV_DELIM2);
     checkInvalidString(current);
     tmp = checkStrtol(current);
-    printf("num alle %d",numAlle);
-    if(strcmp(type,CMD_ARG_PCBMILL)==0) tmpSize =numAlle;
+    if(strcmp(type,CMD_ARG_PCBMILL)==0) tmpSize =2;
     else tmpSize = numAlle+1;
     while(current != NULL && (*counter) < tmpSize){
-
-        printf("i'm here\n");
         current = strtok(NULL,INV_DELIM3);
         checkInvalidString(current);
         a[*counter] = checkStrtol(current);
         (*counter)++;
     }
+
     if(!(strcmp(type,CMD_ARG_PCBMILL)==0)) (*counter)--;
     return tmp;
 }

@@ -40,5 +40,5 @@ int mainFunction(int argc, char *argv[]);
 int validArgu(int argc, char *argv[],FILE *file,InVTable *invt );
 void gaprimer(int numberGen,char *type,int populationSize,int numAlle,InVTable *invt);
 int getSize(InVTable *invt,int inputSize,char *type);
-void validAfterInput(char *type,int i, int inputI,int inputnumAllele);
+void validAfterInput(char *type,int i, int inputI,int counter,int inputnumAllele);
 #endif

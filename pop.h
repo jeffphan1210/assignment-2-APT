@@ -43,7 +43,7 @@ void pop_set_fns(Pop_list *p,CreateFn cf,MutateFn mf,CrossOverFn cof,EvalFn ef);
  * The function also prints out the number of the current generation.
  * This function must not be able to access any generation value outside
  * of the function. */
-void pop_print_fittest(Pop_list *p);
+void pop_print_fittest(Pop_list *p,int);
 
 void pop_create_gene(int popsize, Pop_list *poplist, int width);
 void insertNode(Pop_list *p,Pop_node *node);
@@ -60,5 +60,4 @@ void freeNode(Pop_node *node);
 void pop_list_add(Pop_list *poplist,Gene *gene);
 void swapPopList(Pop_list *p,Pop_list *p1);
 void freeList(Pop_node *currentNode);
-/* TO DO - other functions as appropriate */
 #endif
